@@ -1,24 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import Header from "./components/Header";
+import Main from "./components/Main";
+import { apiKey } from "./config/apiKey";
 
 function App() {
+  const lang = "pt_br";
+  const [city, setCity] = useState("");
+  const [weatherData, setWeatherData] = useState([]);
+
+  const getWeather = (event) => {
+    if (event.key === "Enter") {
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=${lang}&APPID=${apiKey}`
+      )
+        .then(async (data) => {
+          if (data.ok) {
+            data = await data.json();
+            setWeatherData([...weatherData, data]);
+            setCity("");
+          }
+        })
+        .catch((e) => console.log("Connection error", e));
+    }
+  };
+
+  const handleDeleteButton = (name) => {
+    const newWeatherData = weatherData.filter(weather => weather.name !== name);
+    setWeatherData(newWeatherData)
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      <Main
+        city={city}
+        setCity={setCity}
+        getWeather={getWeather}
+        weatherData={weatherData}
+        handleDeleteButton={handleDeleteButton}
+      />
+    </>
   );
 }
 
